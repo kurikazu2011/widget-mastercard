@@ -1,9 +1,6 @@
 // Scriptable Lock Screen Widget
 // Accessory Rectangular
-// Layout:
-// USD/JPY          YES
-// MC: 157.77   (-0.31%)
-// MKT:155.55
+// Auto refresh enabled
 
 const jsonUrl = "https://kurikazu2011.github.io/Mastercard-Currency-Opportunity-Checker-Kazu-K-/latest_rates.json"
 const targetPair = "USD/JPY"
@@ -26,6 +23,9 @@ const item = findPair(raw, targetPair)
 const w = new ListWidget()
 w.backgroundColor = new Color("#111111")
 
+// 🔥 自動更新（5分後に再取得リクエスト）
+w.refreshAfterDate = new Date(Date.now() + 5 * 60 * 1000)
+
 if (!item) {
   const err = w.addText("Pair not found")
   err.font = Font.systemFont(16)
@@ -45,8 +45,8 @@ if (item.diff_percent !== undefined) {
 } else {
   diffValue = ((Number(item.mastercard_rate) - Number(item.market_rate)) / Number(item.market_rate)) * 100
 }
-const diff = `${diffValue >= 0 ? "+" : ""}${diffValue.toFixed(2)}%`
 
+const diff = `${diffValue >= 0 ? "+" : ""}${diffValue.toFixed(2)}%`
 const better = item.better_rate !== undefined ? Boolean(item.better_rate) : diffValue < 0
 
 const goodColor = new Color("#22c55e")
@@ -54,13 +54,14 @@ const neutralColor = new Color("#9ca3af")
 const white = Color.white()
 
 if (config.runsInAccessoryWidget) {
+
   // ===== 1行目 =====
   const row1 = w.addStack()
   row1.layoutHorizontally()
   row1.centerAlignContent()
 
   const pairText = row1.addText(pair)
-  pairText.font = Font.boldSystemFont(18)   // 1.3倍くらい
+  pairText.font = Font.boldSystemFont(18)
   pairText.textColor = white
 
   row1.addSpacer()
@@ -103,7 +104,7 @@ if (config.runsInAccessoryWidget) {
   mktLabel.font = Font.mediumSystemFont(15)
   mktLabel.textColor = white
 
-  row3.addSpacer(2) // MKT: は1文字長いので少し小さめ
+  row3.addSpacer(2)
 
   const mktValue = row3.addText(mkt)
   mktValue.font = Font.mediumSystemFont(15)
